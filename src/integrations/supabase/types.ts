@@ -9,7 +9,57 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      patient_records: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          left_eye_add: string | null
+          left_eye_axis: string | null
+          left_eye_cylinder: string | null
+          left_eye_sphere: string | null
+          mobile: string
+          name: string
+          right_eye_add: string | null
+          right_eye_axis: string | null
+          right_eye_cylinder: string | null
+          right_eye_sphere: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          left_eye_add?: string | null
+          left_eye_axis?: string | null
+          left_eye_cylinder?: string | null
+          left_eye_sphere?: string | null
+          mobile: string
+          name: string
+          right_eye_add?: string | null
+          right_eye_axis?: string | null
+          right_eye_cylinder?: string | null
+          right_eye_sphere?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          left_eye_add?: string | null
+          left_eye_axis?: string | null
+          left_eye_cylinder?: string | null
+          left_eye_sphere?: string | null
+          mobile?: string
+          name?: string
+          right_eye_add?: string | null
+          right_eye_axis?: string | null
+          right_eye_cylinder?: string | null
+          right_eye_sphere?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

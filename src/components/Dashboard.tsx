@@ -3,11 +3,11 @@ import { usePatientRecords } from '@/contexts/PatientRecordsContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { Edit, Eye } from 'lucide-react';
+import { Edit, Eye, Loader2 } from 'lucide-react';
 import Layout from './Layout';
 
 const Dashboard = () => {
-  const { records } = usePatientRecords();
+  const { records, isLoading } = usePatientRecords();
   const navigate = useNavigate();
 
   const handleEdit = (mobile: string) => {
@@ -17,6 +17,17 @@ const Dashboard = () => {
   const handleView = (mobile: string) => {
     navigate(`/view-record?mobile=${mobile}`);
   };
+
+  if (isLoading) {
+    return (
+      <Layout title="Loading Records..." currentPath="/dashboard">
+        <div className="flex flex-col items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-medical-600 mb-4" />
+          <p className="text-gray-500">Loading patient records...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="Patient Records" currentPath="/dashboard">

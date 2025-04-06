@@ -1,5 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 // Define the eye prescription data structure
 export interface EyePrescription {
@@ -21,49 +23,121 @@ export interface PatientRecord {
 
 interface PatientRecordsContextType {
   records: PatientRecord[];
-  addRecord: (record: Omit<PatientRecord, 'id'>) => void;
+  addRecord: (record: Omit<PatientRecord, 'id'>) => Promise<void>;
   searchRecords: (query: string) => PatientRecord[];
   getRecordByMobile: (mobile: string) => PatientRecord | undefined;
-  clearRecords: () => void;
+  clearRecords: () => Promise<void>;
+  isLoading: boolean;
 }
 
 const PatientRecordsContext = createContext<PatientRecordsContextType | undefined>(undefined);
 
 export const PatientRecordsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [records, setRecords] = useState<PatientRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch records from Supabase on component mount
   useEffect(() => {
-    // Load records from localStorage
-    const storedRecords = localStorage.getItem('patientRecords');
-    if (storedRecords) {
-      setRecords(JSON.parse(storedRecords));
-    }
+    fetchRecords();
   }, []);
 
-  // Save records to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('patientRecords', JSON.stringify(records));
-  }, [records]);
+  const fetchRecords = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('patient_records')
+        .select('*');
 
-  const addRecord = (record: Omit<PatientRecord, 'id'>) => {
-    // Check if a record with the same mobile number already exists
-    const existingRecordIndex = records.findIndex(r => r.mobile === record.mobile);
-    
-    if (existingRecordIndex !== -1) {
-      // Update the existing record
-      const updatedRecords = [...records];
-      updatedRecords[existingRecordIndex] = {
-        ...record,
-        id: records[existingRecordIndex].id,
-      };
-      setRecords(updatedRecords);
-    } else {
-      // Add a new record
-      const newRecord = {
-        ...record,
-        id: Date.now().toString(),
-      };
-      setRecords(prev => [...prev, newRecord]);
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        // Transform the data from Supabase format to our application format
+        const transformedRecords: PatientRecord[] = data.map(item => ({
+          id: item.id,
+          date: item.date,
+          name: item.name,
+          mobile: item.mobile,
+          rightEye: {
+            sphere: item.right_eye_sphere || '',
+            cylinder: item.right_eye_cylinder || '',
+            axis: item.right_eye_axis || '',
+            add: item.right_eye_add || ''
+          },
+          leftEye: {
+            sphere: item.left_eye_sphere || '',
+            cylinder: item.left_eye_cylinder || '',
+            axis: item.left_eye_axis || '',
+            add: item.left_eye_add || ''
+          }
+        }));
+        setRecords(transformedRecords);
+      }
+    } catch (error) {
+      console.error('Error fetching records:', error);
+      toast.error('Failed to load patient records');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addRecord = async (record: Omit<PatientRecord, 'id'>) => {
+    try {
+      // Check if a record with the same mobile number already exists
+      const existingRecord = await supabase
+        .from('patient_records')
+        .select('*')
+        .eq('mobile', record.mobile)
+        .single();
+
+      if (existingRecord.data) {
+        // Update existing record
+        const { error } = await supabase
+          .from('patient_records')
+          .update({
+            date: record.date,
+            name: record.name,
+            right_eye_sphere: record.rightEye.sphere,
+            right_eye_cylinder: record.rightEye.cylinder,
+            right_eye_axis: record.rightEye.axis,
+            right_eye_add: record.rightEye.add,
+            left_eye_sphere: record.leftEye.sphere,
+            left_eye_cylinder: record.leftEye.cylinder,
+            left_eye_axis: record.leftEye.axis,
+            left_eye_add: record.leftEye.add,
+            updated_at: new Date().toISOString()
+          })
+          .eq('mobile', record.mobile);
+
+        if (error) throw error;
+      } else {
+        // Insert new record
+        const { error } = await supabase
+          .from('patient_records')
+          .insert({
+            date: record.date,
+            name: record.name,
+            mobile: record.mobile,
+            right_eye_sphere: record.rightEye.sphere,
+            right_eye_cylinder: record.rightEye.cylinder,
+            right_eye_axis: record.rightEye.axis,
+            right_eye_add: record.rightEye.add,
+            left_eye_sphere: record.leftEye.sphere,
+            left_eye_cylinder: record.leftEye.cylinder,
+            left_eye_axis: record.leftEye.axis,
+            left_eye_add: record.leftEye.add
+          });
+
+        if (error) throw error;
+      }
+
+      // Refresh records after add/update
+      await fetchRecords();
+    } catch (error) {
+      console.error('Error adding/updating record:', error);
+      toast.error('Failed to save patient record');
+      throw error;
     }
   };
 
@@ -82,14 +156,26 @@ export const PatientRecordsProvider: React.FC<{ children: ReactNode }> = ({ chil
     return records.find(record => record.mobile === mobile);
   };
 
-  const clearRecords = () => {
-    setRecords([]);
-    localStorage.removeItem('patientRecords');
+  const clearRecords = async () => {
+    try {
+      const { error } = await supabase
+        .from('patient_records')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+
+      if (error) throw error;
+      
+      setRecords([]);
+      toast.success('All records cleared successfully');
+    } catch (error) {
+      console.error('Error clearing records:', error);
+      toast.error('Failed to clear records');
+    }
   };
 
   return (
     <PatientRecordsContext.Provider 
-      value={{ records, addRecord, searchRecords, getRecordByMobile, clearRecords }}
+      value={{ records, addRecord, searchRecords, getRecordByMobile, clearRecords, isLoading }}
     >
       {children}
     </PatientRecordsContext.Provider>

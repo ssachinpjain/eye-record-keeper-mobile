@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import Layout from './Layout';
+import { Loader2 } from 'lucide-react';
 
 const defaultEyeData: EyePrescription = {
   sphere: '',
@@ -20,7 +21,7 @@ const defaultEyeData: EyePrescription = {
 const AddRecordForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addRecord, getRecordByMobile } = usePatientRecords();
+  const { addRecord, getRecordByMobile, isLoading } = usePatientRecords();
   
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [name, setName] = useState('');
@@ -28,6 +29,7 @@ const AddRecordForm = () => {
   const [rightEye, setRightEye] = useState<EyePrescription>({ ...defaultEyeData });
   const [leftEye, setLeftEye] = useState<EyePrescription>({ ...defaultEyeData });
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Check if we're editing an existing record
   useEffect(() => {
@@ -47,7 +49,7 @@ const AddRecordForm = () => {
     }
   }, [location.search, getRecordByMobile]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
@@ -70,9 +72,17 @@ const AddRecordForm = () => {
       leftEye
     };
 
-    addRecord(newRecord);
-    toast.success(isEditing ? 'Record updated successfully' : 'Record added successfully');
-    navigate('/dashboard');
+    setIsSaving(true);
+    try {
+      await addRecord(newRecord);
+      toast.success(isEditing ? 'Record updated successfully' : 'Record added successfully');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error saving record:', error);
+      // Error is already handled in addRecord
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const updateRightEye = (field: keyof EyePrescription, value: string) => {
@@ -82,6 +92,17 @@ const AddRecordForm = () => {
   const updateLeftEye = (field: keyof EyePrescription, value: string) => {
     setLeftEye(prev => ({ ...prev, [field]: value }));
   };
+
+  if (isLoading) {
+    return (
+      <Layout title="Loading..." showBackButton currentPath='/add-record'>
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-medical-600" />
+          <p className="ml-2">Loading records...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title={isEditing ? 'Edit Record' : 'Add New Record'} showBackButton currentPath='/add-record'>
@@ -236,8 +257,19 @@ const AddRecordForm = () => {
           </Card>
         </div>
 
-        <Button type="submit" className="w-full bg-medical-600 hover:bg-medical-700">
-          {isEditing ? 'Update Record' : 'Save Record'}
+        <Button 
+          type="submit" 
+          className="w-full bg-medical-600 hover:bg-medical-700"
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {isEditing ? 'Updating...' : 'Saving...'}
+            </>
+          ) : (
+            isEditing ? 'Update Record' : 'Save Record'
+          )}
         </Button>
       </form>
     </Layout>

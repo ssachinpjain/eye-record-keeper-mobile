@@ -5,12 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { Search, Edit, Eye } from 'lucide-react';
+import { Search, Edit, Eye, Loader2 } from 'lucide-react';
 import Layout from './Layout';
 
 const SearchScreen = () => {
   const [query, setQuery] = useState('');
-  const { searchRecords } = usePatientRecords();
+  const { searchRecords, isLoading } = usePatientRecords();
   const navigate = useNavigate();
   
   const searchResults = searchRecords(query);
@@ -22,6 +22,17 @@ const SearchScreen = () => {
   const handleView = (mobile: string) => {
     navigate(`/view-record?mobile=${mobile}`);
   };
+
+  if (isLoading) {
+    return (
+      <Layout title="Loading..." currentPath="/search">
+        <div className="flex flex-col items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-medical-600 mb-4" />
+          <p className="text-gray-500">Loading patient records...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="Search Records" currentPath="/search">

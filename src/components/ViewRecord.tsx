@@ -4,13 +4,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { PatientRecord, usePatientRecords } from '@/contexts/PatientRecordsContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Edit, AlertCircle } from 'lucide-react';
+import { Edit, AlertCircle, Loader2 } from 'lucide-react';
 import Layout from './Layout';
 
 const ViewRecord = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { getRecordByMobile } = usePatientRecords();
+  const { getRecordByMobile, isLoading } = usePatientRecords();
   const [record, setRecord] = useState<PatientRecord | null>(null);
   const [notFound, setNotFound] = useState(false);
 
@@ -29,6 +29,17 @@ const ViewRecord = () => {
       setNotFound(true);
     }
   }, [location.search, getRecordByMobile]);
+
+  if (isLoading) {
+    return (
+      <Layout title="Loading..." showBackButton currentPath="">
+        <div className="flex flex-col items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-medical-600 mb-4" />
+          <p className="text-gray-500">Loading patient record...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   if (notFound) {
     return (
