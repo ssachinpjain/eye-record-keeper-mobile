@@ -19,6 +19,10 @@ export interface PatientRecord {
   mobile: string;
   rightEye: EyePrescription;
   leftEye: EyePrescription;
+  framePrice: number;
+  glassPrice: number;
+  totalPrice: number;
+  remarks: string;
 }
 
 interface PatientRecordsContextType {
@@ -70,7 +74,11 @@ export const PatientRecordsProvider: React.FC<{ children: ReactNode }> = ({ chil
             cylinder: item.left_eye_cylinder || '',
             axis: item.left_eye_axis || '',
             add: item.left_eye_add || ''
-          }
+          },
+          framePrice: Number(item.frame_price) || 0,
+          glassPrice: Number(item.glass_price) || 0,
+          totalPrice: Number(item.total_price) || 0,
+          remarks: item.remarks || ''
         }));
         setRecords(transformedRecords);
       }
@@ -106,6 +114,10 @@ export const PatientRecordsProvider: React.FC<{ children: ReactNode }> = ({ chil
             left_eye_cylinder: record.leftEye.cylinder,
             left_eye_axis: record.leftEye.axis,
             left_eye_add: record.leftEye.add,
+            frame_price: record.framePrice,
+            glass_price: record.glassPrice,
+            total_price: record.totalPrice,
+            remarks: record.remarks,
             updated_at: new Date().toISOString()
           })
           .eq('mobile', record.mobile);
@@ -126,7 +138,11 @@ export const PatientRecordsProvider: React.FC<{ children: ReactNode }> = ({ chil
             left_eye_sphere: record.leftEye.sphere,
             left_eye_cylinder: record.leftEye.cylinder,
             left_eye_axis: record.leftEye.axis,
-            left_eye_add: record.leftEye.add
+            left_eye_add: record.leftEye.add,
+            frame_price: record.framePrice,
+            glass_price: record.glassPrice,
+            total_price: record.totalPrice,
+            remarks: record.remarks
           });
 
         if (error) throw error;

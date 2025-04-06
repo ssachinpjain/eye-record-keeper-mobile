@@ -13,6 +13,8 @@ export type Database = {
         Row: {
           created_at: string
           date: string
+          frame_price: number | null
+          glass_price: number | null
           id: string
           left_eye_add: string | null
           left_eye_axis: string | null
@@ -20,15 +22,19 @@ export type Database = {
           left_eye_sphere: string | null
           mobile: string
           name: string
+          remarks: string | null
           right_eye_add: string | null
           right_eye_axis: string | null
           right_eye_cylinder: string | null
           right_eye_sphere: string | null
+          total_price: number | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           date: string
+          frame_price?: number | null
+          glass_price?: number | null
           id?: string
           left_eye_add?: string | null
           left_eye_axis?: string | null
@@ -36,15 +42,19 @@ export type Database = {
           left_eye_sphere?: string | null
           mobile: string
           name: string
+          remarks?: string | null
           right_eye_add?: string | null
           right_eye_axis?: string | null
           right_eye_cylinder?: string | null
           right_eye_sphere?: string | null
+          total_price?: number | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           date?: string
+          frame_price?: number | null
+          glass_price?: number | null
           id?: string
           left_eye_add?: string | null
           left_eye_axis?: string | null
@@ -52,10 +62,12 @@ export type Database = {
           left_eye_sphere?: string | null
           mobile?: string
           name?: string
+          remarks?: string | null
           right_eye_add?: string | null
           right_eye_axis?: string | null
           right_eye_cylinder?: string | null
           right_eye_sphere?: string | null
+          total_price?: number | null
           updated_at?: string
         }
         Relationships: []

@@ -137,6 +137,35 @@ const ViewRecord = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Pricing Details */}
+        <Card className="border-medical-300">
+          <CardContent className="p-4">
+            <h3 className="text-lg font-semibold mb-3 text-medical-800">Pricing Details</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-500">Frame Price</p>
+                <p className="font-medium">₹{record.framePrice.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Glass Price</p>
+                <p className="font-medium">₹{record.glassPrice.toFixed(2)}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-sm text-gray-500">Total Price</p>
+                <p className="font-medium text-medical-600 text-lg">₹{record.totalPrice.toFixed(2)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Remarks */}
+        <Card className="border-medical-300">
+          <CardContent className="p-4">
+            <h3 className="text-lg font-semibold mb-2 text-medical-800">Remarks</h3>
+            <p className="whitespace-pre-wrap">{record.remarks || 'No remarks provided.'}</p>
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );

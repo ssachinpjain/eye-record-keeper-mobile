@@ -40,7 +40,7 @@ const LoginScreen = () => {
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center text-medical-800">
-            Eye Record Keeper
+            DEEPAK P JAIN
           </CardTitle>
           <CardDescription className="text-center">
             Enter your credentials to access patient records

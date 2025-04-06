@@ -30,7 +30,7 @@ const Dashboard = () => {
   }
 
   return (
-    <Layout title="Patient Records" currentPath="/dashboard">
+    <Layout title="DEEPAK P JAIN" currentPath="/dashboard">
       <div className="space-y-4">
         {records.length === 0 ? (
           <div className="text-center py-10">
@@ -58,6 +58,7 @@ const Dashboard = () => {
                       <h3 className="font-medium text-medical-800">{record.name}</h3>
                       <p className="text-sm text-gray-500">{record.mobile}</p>
                       <p className="text-xs text-gray-400">Last updated: {record.date}</p>
+                      <p className="text-sm text-medical-600 mt-1">₹{record.totalPrice.toFixed(2)}</p>
                     </div>
                     <div className="flex space-x-2">
                       <Button 

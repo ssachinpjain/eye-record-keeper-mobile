@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import Layout from './Layout';
@@ -28,8 +29,17 @@ const AddRecordForm = () => {
   const [mobile, setMobile] = useState('');
   const [rightEye, setRightEye] = useState<EyePrescription>({ ...defaultEyeData });
   const [leftEye, setLeftEye] = useState<EyePrescription>({ ...defaultEyeData });
+  const [framePrice, setFramePrice] = useState<number>(0);
+  const [glassPrice, setGlassPrice] = useState<number>(0);
+  const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [remarks, setRemarks] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Calculate total price when frame or glass price changes
+  useEffect(() => {
+    setTotalPrice(framePrice + glassPrice);
+  }, [framePrice, glassPrice]);
 
   // Check if we're editing an existing record
   useEffect(() => {
@@ -44,6 +54,10 @@ const AddRecordForm = () => {
         setMobile(record.mobile);
         setRightEye(record.rightEye);
         setLeftEye(record.leftEye);
+        setFramePrice(record.framePrice);
+        setGlassPrice(record.glassPrice);
+        setTotalPrice(record.totalPrice);
+        setRemarks(record.remarks);
         setIsEditing(true);
       }
     }
@@ -53,8 +67,8 @@ const AddRecordForm = () => {
     e.preventDefault();
     
     // Validation
-    if (!mobile || !name) {
-      toast.error('Patient name and mobile number are required');
+    if (!mobile || !name || !date || !remarks) {
+      toast.error('Name, mobile number, date, and remarks are required');
       return;
     }
 
@@ -69,7 +83,11 @@ const AddRecordForm = () => {
       name,
       mobile,
       rightEye,
-      leftEye
+      leftEye,
+      framePrice,
+      glassPrice,
+      totalPrice,
+      remarks
     };
 
     setIsSaving(true);
@@ -255,6 +273,63 @@ const AddRecordForm = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Pricing Details */}
+          <Card className="border-medical-300">
+            <CardContent className="pt-4">
+              <h3 className="text-lg font-semibold mb-3 text-medical-800">Pricing Details</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="form-group">
+                  <Label htmlFor="framePrice" className="form-label">Frame Price</Label>
+                  <Input 
+                    type="number" 
+                    id="framePrice" 
+                    value={framePrice.toString()}
+                    onChange={(e) => setFramePrice(Number(e.target.value) || 0)}
+                    className="input-field"
+                    placeholder="Enter frame price"
+                    min="0"
+                  />
+                </div>
+                <div className="form-group">
+                  <Label htmlFor="glassPrice" className="form-label">Glass Price</Label>
+                  <Input 
+                    type="number" 
+                    id="glassPrice" 
+                    value={glassPrice.toString()}
+                    onChange={(e) => setGlassPrice(Number(e.target.value) || 0)}
+                    className="input-field"
+                    placeholder="Enter glass price"
+                    min="0"
+                  />
+                </div>
+                <div className="form-group col-span-2">
+                  <Label htmlFor="totalPrice" className="form-label">Total Price</Label>
+                  <Input 
+                    type="number" 
+                    id="totalPrice" 
+                    value={totalPrice.toString()}
+                    readOnly
+                    className="input-field bg-gray-100"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Automatically calculated: Frame Price + Glass Price</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Remarks */}
+          <div className="form-group">
+            <Label htmlFor="remarks" className="form-label">Remarks</Label>
+            <Textarea 
+              id="remarks" 
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+              className="input-field min-h-[100px]"
+              placeholder="Add any additional notes or remarks here"
+              required
+            />
+          </div>
         </div>
 
         <Button 
