@@ -48,15 +48,18 @@ export const PatientRecordsProvider: React.FC<{ children: ReactNode }> = ({ chil
   const fetchRecords = async () => {
     setIsLoading(true);
     try {
+      console.log('Fetching records from Supabase...');
       const { data, error } = await supabase
         .from('patient_records')
         .select('*');
 
       if (error) {
+        console.error('Error fetching data:', error);
         throw error;
       }
 
       if (data) {
+        console.log('Records fetched successfully:', data.length);
         // Transform the data from Supabase format to our application format
         const transformedRecords: PatientRecord[] = data.map(item => ({
           id: item.id,
@@ -92,15 +95,19 @@ export const PatientRecordsProvider: React.FC<{ children: ReactNode }> = ({ chil
 
   const addRecord = async (record: Omit<PatientRecord, 'id'>) => {
     try {
+      console.log('Adding/updating record:', record);
       // Check if a record with the same mobile number already exists
       const existingRecord = await supabase
         .from('patient_records')
         .select('*')
         .eq('mobile', record.mobile)
-        .single();
+        .maybeSingle();
+
+      console.log('Existing record check result:', existingRecord);
 
       if (existingRecord.data) {
         // Update existing record
+        console.log('Updating existing record for mobile:', record.mobile);
         const { error } = await supabase
           .from('patient_records')
           .update({
@@ -122,9 +129,14 @@ export const PatientRecordsProvider: React.FC<{ children: ReactNode }> = ({ chil
           })
           .eq('mobile', record.mobile);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error updating record:', error);
+          throw error;
+        }
+        console.log('Record updated successfully');
       } else {
         // Insert new record
+        console.log('Inserting new record for mobile:', record.mobile);
         const { error } = await supabase
           .from('patient_records')
           .insert({
@@ -145,7 +157,11 @@ export const PatientRecordsProvider: React.FC<{ children: ReactNode }> = ({ chil
             remarks: record.remarks
           });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error inserting record:', error);
+          throw error;
+        }
+        console.log('Record inserted successfully');
       }
 
       // Refresh records after add/update
