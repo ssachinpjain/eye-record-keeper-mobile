@@ -3,11 +3,11 @@ import { usePatientRecords } from '@/contexts/PatientRecordsContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { Edit, Eye, Loader2 } from 'lucide-react';
+import { Edit, Eye, Loader2, PlusCircle } from 'lucide-react';
 import Layout from './Layout';
 
 const Dashboard = () => {
-  const { records, isLoading } = usePatientRecords();
+  const { records, isLoading, addDemoRecord } = usePatientRecords();
   const navigate = useNavigate();
 
   const handleEdit = (mobile: string) => {
@@ -16,6 +16,10 @@ const Dashboard = () => {
 
   const handleView = (mobile: string) => {
     navigate(`/view-record?mobile=${mobile}`);
+  };
+
+  const handleAddDemo = async () => {
+    await addDemoRecord();
   };
 
   if (isLoading) {
@@ -35,12 +39,22 @@ const Dashboard = () => {
         {records.length === 0 ? (
           <div className="text-center py-10">
             <p className="text-gray-500 mb-4">No patient records found</p>
-            <Button 
-              onClick={() => navigate('/add-record')}
-              className="bg-medical-600 hover:bg-medical-700"
-            >
-              Add Your First Record
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button 
+                onClick={() => navigate('/add-record')}
+                className="bg-medical-600 hover:bg-medical-700"
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add New Record
+              </Button>
+              <Button 
+                onClick={handleAddDemo}
+                variant="outline"
+                className="border-medical-500 text-medical-600 hover:bg-medical-50"
+              >
+                Add Demo Record
+              </Button>
+            </div>
           </div>
         ) : (
           <>
@@ -48,6 +62,14 @@ const Dashboard = () => {
               <h2 className="text-xl font-semibold text-medical-800">
                 All Records ({records.length})
               </h2>
+              <Button 
+                onClick={() => navigate('/add-record')}
+                className="bg-medical-600 hover:bg-medical-700"
+                size="sm"
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                New Record
+              </Button>
             </div>
             
             {records.map((record) => (

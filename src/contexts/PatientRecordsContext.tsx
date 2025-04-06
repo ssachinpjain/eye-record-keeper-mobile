@@ -31,6 +31,7 @@ interface PatientRecordsContextType {
   searchRecords: (query: string) => PatientRecord[];
   getRecordByMobile: (mobile: string) => PatientRecord | undefined;
   clearRecords: () => Promise<void>;
+  addDemoRecord: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -134,10 +135,11 @@ export const PatientRecordsProvider: React.FC<{ children: ReactNode }> = ({ chil
           throw error;
         }
         console.log('Record updated successfully');
+        toast.success('Record updated successfully');
       } else {
         // Insert new record
         console.log('Inserting new record for mobile:', record.mobile);
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from('patient_records')
           .insert({
             date: record.date,
@@ -155,21 +157,58 @@ export const PatientRecordsProvider: React.FC<{ children: ReactNode }> = ({ chil
             glass_price: record.glassPrice,
             total_price: record.totalPrice,
             remarks: record.remarks
-          });
+          })
+          .select();
 
         if (error) {
           console.error('Error inserting record:', error);
           throw error;
         }
-        console.log('Record inserted successfully');
+        console.log('Record inserted successfully', data);
+        toast.success('Record added successfully');
       }
 
       // Refresh records after add/update
       await fetchRecords();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding/updating record:', error);
-      toast.error('Failed to save patient record');
+      toast.error(`Failed to save patient record: ${error.message || 'Unknown error'}`);
       throw error;
+    }
+  };
+
+  const addDemoRecord = async () => {
+    try {
+      setIsLoading(true);
+      const demoRecord: Omit<PatientRecord, 'id'> = {
+        date: new Date().toISOString().split('T')[0],
+        name: 'Demo Patient',
+        mobile: '9876543210',
+        rightEye: {
+          sphere: '+1.25',
+          cylinder: '-0.50',
+          axis: '180',
+          add: '+2.00'
+        },
+        leftEye: {
+          sphere: '+1.00',
+          cylinder: '-0.75',
+          axis: '175',
+          add: '+2.00'
+        },
+        framePrice: 1500,
+        glassPrice: 2500,
+        totalPrice: 4000,
+        remarks: 'This is a demo record created for testing purposes.'
+      };
+
+      await addRecord(demoRecord);
+      toast.success('Demo record added successfully!');
+    } catch (error) {
+      console.error('Failed to add demo record:', error);
+      toast.error('Failed to add demo record');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -207,7 +246,7 @@ export const PatientRecordsProvider: React.FC<{ children: ReactNode }> = ({ chil
 
   return (
     <PatientRecordsContext.Provider 
-      value={{ records, addRecord, searchRecords, getRecordByMobile, clearRecords, isLoading }}
+      value={{ records, addRecord, searchRecords, getRecordByMobile, clearRecords, addDemoRecord, isLoading }}
     >
       {children}
     </PatientRecordsContext.Provider>
